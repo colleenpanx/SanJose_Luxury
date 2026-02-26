@@ -69,6 +69,15 @@
             white-space: nowrap;
             animation: marquee 25s linear infinite;
         }
+
+        /* 選中按鈕樣式優化 */
+        .brand-btn-active {
+            background-color: #ec4899 !important; /* pink-500 */
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.3) !important;
+            border-color: #ec4899 !important;
+        }
     </style>
 </head>
 <body class="flower-bg">
@@ -96,10 +105,10 @@
         </div>
     </header>
 
-    <!-- 品牌標籤快速導覽 -->
+    <!-- 品牌標籤快速導覽 - 修改為可折行 (flex-wrap) -->
     <div class="max-w-screen-md mx-auto px-4 mt-6">
-        <div id="brand-filter" class="flex overflow-x-auto gap-2 pb-2 no-scrollbar text-nowrap">
-            <button onclick="filterByBrand('all')" id="btn-all" class="brand-btn bg-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm transition-all">所有商品</button>
+        <div id="brand-filter" class="flex flex-wrap gap-2 pb-2">
+            <button onclick="filterByBrand('all')" id="btn-all" class="brand-btn brand-btn-active px-4 py-1.5 rounded-full border border-pink-100 text-xs shadow-sm transition-all">所有商品</button>
         </div>
     </div>
 
@@ -246,12 +255,13 @@
 
         function updateBrandFilters(products) {
             const filterContainer = document.getElementById('brand-filter');
+            // 抓取所有品牌並進行字母排序 (A-Z)
             const brands = [...new Set(products.map(p => p.brand))].filter(b => b && b !== '其他');
-            brands.sort();
+            brands.sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
 
             brands.forEach(brand => {
                 const btn = document.createElement('button');
-                btn.className = 'brand-btn bg-white/50 px-4 py-1.5 rounded-full border border-pink-50 text-xs text-gray-500 shadow-sm transition-all';
+                btn.className = 'brand-btn bg-white px-4 py-1.5 rounded-full border border-pink-50 text-xs text-gray-500 shadow-sm transition-all';
                 btn.innerText = brand;
                 btn.onclick = () => filterByBrand(brand, btn);
                 filterContainer.appendChild(btn);
@@ -259,15 +269,18 @@
         }
 
         function filterByBrand(brand, btnEl) {
+            // 清除所有按鈕樣式
             document.querySelectorAll('.brand-btn').forEach(b => {
-                b.classList.remove('bg-pink-500', 'text-white');
-                b.classList.add('bg-white/50', 'text-gray-500');
+                b.classList.remove('brand-btn-active');
+                b.classList.add('bg-white', 'text-gray-500');
             });
+            
+            // 設定點擊按鈕的樣式
             if (btnEl) {
-                btnEl.classList.remove('bg-white/50', 'text-gray-500');
-                btnEl.classList.add('bg-pink-500', 'text-white');
+                btnEl.classList.remove('bg-white', 'text-gray-500');
+                btnEl.classList.add('brand-btn-active');
             } else {
-                document.getElementById('btn-all').classList.add('bg-pink-500', 'text-white');
+                document.getElementById('btn-all').classList.add('brand-btn-active');
             }
 
             const filtered = brand === 'all' ? allProducts : allProducts.filter(p => p.brand === brand);
